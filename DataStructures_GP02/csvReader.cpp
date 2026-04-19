@@ -68,8 +68,11 @@ bool CSVReader::load(const string& filename, Graph& graph) {
             continue;
         }
 
-        double dist = distStr.empty() ? 0.0 : stod(distStr);
-        double cost = costStr.empty() ? 0.0 : stod(costStr);
+        double dist = 0.0, cost = 0.0;
+        try { dist = distStr.empty() ? 0.0 : stod(distStr); }
+        catch (...) { cerr << "Bad distance at line " << lineNum << ": [" << distStr << "]\n"; continue; }
+        try { cost = costStr.empty() ? 0.0 : stod(costStr); }
+        catch (...) { cerr << "Bad cost at line " << lineNum << ": [" << costStr << "]\n"; continue; }
         graph.addAirportAndEdge(oCode, oCity, dCode, dCity, dist, cost);
     }
     file.close();
