@@ -33,7 +33,7 @@ static void printPath(const PathResult& pr,
     }
     cout << fixed << setprecision(2)
          << "  |  Distance: " << pr.distance
-         << " mi  |  Cost: $"  << pr.cost << "\n";
+         << " mi  |  Cost: $" << pr.cost << "\n";
 }
 
 static void printTraversal(const vector<string>& order, const string& label) {
@@ -53,36 +53,42 @@ int main() {
     cout << "Loaded " << graph.getVertexCount() << " airports, "
          << graph.getEdgeCount() << " flights.\n";
 
-    cout << "Testing Task 2...\n";
     // ── Task 2: Shortest path between two airports ────────────────────────────
     sep("TASK 2 — Shortest Path Between Two Airports");
-    printPath(graph.shortestPath("ATL", "LAX"), "ATL", "LAX");
+    printPath(graph.shortestPath("ATL", "MIA"), "ATL", "MIA");
     printPath(graph.shortestPath("MIA", "ORD"), "MIA", "ORD");
-    printPath(graph.shortestPath("JFK", "SFO"), "JFK", "SFO");
+    printPath(graph.shortestPath("ORD", "BOS"), "ORD", "BOS");
 
-    cout << "Task 2 done.\n";
     // ── Task 3: Shortest paths to all airports in a state ────────────────────
     sep("TASK 3 — Shortest Paths from ATL to all FL airports");
     {
         auto results = graph.shortestPathsToState("ATL", "FL");
-        if (results.empty()) cout << "  No paths found.\n";
-        for (const auto& pr : results) printPath(pr, "ATL", pr.path.empty()?"?":pr.path.back());
+        if (results.empty()) { cout << "  No paths found.\n"; }
+        else {
+            for (const auto& pr : results) {
+                string dest = pr.found ? pr.path.back() : "unknown";
+                printPath(pr, "ATL", dest);
+            }
+        }
     }
     sep("TASK 3 — Shortest Paths from ORD to all TX airports");
     {
         auto results = graph.shortestPathsToState("ORD", "TX");
-        if (results.empty()) cout << "  No paths found.\n";
-        for (const auto& pr : results) printPath(pr, "ORD", pr.path.empty()?"?":pr.path.back());
+        if (results.empty()) { cout << "  No paths found.\n"; }
+        else {
+            for (const auto& pr : results) {
+                string dest = pr.found ? pr.path.back() : "unknown";
+                printPath(pr, "ORD", dest);
+            }
+        }
     }
 
-    cout << "Task 3 done.\n";
     // ── Task 4: Shortest path with exact number of stops ─────────────────────
     sep("TASK 4 — Shortest Path with Exact Stops");
-    printPath(graph.shortestPathWithStops("ATL", "LAX", 1), "ATL", "LAX (1 stop)");
-    printPath(graph.shortestPathWithStops("MIA", "SEA", 2), "MIA", "SEA (2 stops)");
-    printPath(graph.shortestPathWithStops("JFK", "DFW", 1), "JFK", "DFW (1 stop)");
+    printPath(graph.shortestPathWithStops("ATL", "MIA",  1), "ATL", "MIA (1 stop)");
+    printPath(graph.shortestPathWithStops("MIA", "ORD",  1), "MIA", "ORD (1 stop)");
+    printPath(graph.shortestPathWithStops("ORD", "BOS",  2), "ORD", "BOS (2 stops)");
 
-    cout << "Task 4 done.\n";
     // ── Task 5: Connection counts ─────────────────────────────────────────────
     sep("TASK 5 — Top 10 Airports by Total Connections");
     auto conns = graph.getConnectionCounts();
@@ -98,44 +104,46 @@ int main() {
              << setw(10) << conns[i].outbound
              << setw(10) << conns[i].total << "\n";
 
-    // ── Task 6 + 7 + 8: Build G_u then run Prim's and Kruskal's ─────────────
+    // ── Task 6 + 7 + 8 ───────────────────────────────────────────────────────
     sep("TASK 6 — Building Undirected Graph G_u");
     graph.buildUndirectedGraph();
     cout << "  G_u built. Connected: " << (graph.isConnected() ? "Yes" : "No") << "\n";
+    if (!graph.isConnected())
+        cout << "  (Graph is disconnected — Prim's and Kruskal's will produce spanning forests)\n";
 
     sep("TASK 7 — Prim's MST (first 10 edges shown)");
     {
         MSTResult mst = PrimMST::run(graph);
-        if (!mst.isConnected) { cout << "  Graph is disconnected.\n"; }
-        else {
-            int show = (int)mst.edges.size() < 10 ? (int)mst.edges.size() : 10;
-            for (int i = 0; i < show; ++i)
-                cout << "    " << mst.edges[i].from << " - " << mst.edges[i].to
-                     << "  $" << fixed << setprecision(2) << mst.edges[i].cost << "\n";
-            cout << "  ... (" << mst.edges.size() << " edges total)\n";
-            cout << "  Total MST Cost: $" << fixed << setprecision(2) << mst.totalCost << "\n";
-        }
-    }
-
-    sep("TASK 8 — Kruskal's MST (first 10 edges shown)");
-    {
-        MSTResult mst = KruskalMST::run(graph);
-        if (!mst.isConnected) cout << "  (Spanning forest — graph is disconnected)\n";
+        if (!mst.isConnected)
+            cout << "  (Spanning forest — graph is disconnected)\n";
         int show = (int)mst.edges.size() < 10 ? (int)mst.edges.size() : 10;
         for (int i = 0; i < show; ++i)
             cout << "    " << mst.edges[i].from << " - " << mst.edges[i].to
                  << "  $" << fixed << setprecision(2) << mst.edges[i].cost << "\n";
         cout << "  ... (" << mst.edges.size() << " edges total)\n";
-        cout << "  Total MST Cost: $" << fixed << setprecision(2) << mst.totalCost << "\n";
+        cout << "  Total Cost: $" << fixed << setprecision(2) << mst.totalCost << "\n";
     }
 
-    // ── DFS examples ─────────────────────────────────────────────────────────
+    sep("TASK 8 — Kruskal's MST (first 10 edges shown)");
+    {
+        MSTResult mst = KruskalMST::run(graph);
+        if (!mst.isConnected)
+            cout << "  (Spanning forest — graph is disconnected)\n";
+        int show = (int)mst.edges.size() < 10 ? (int)mst.edges.size() : 10;
+        for (int i = 0; i < show; ++i)
+            cout << "    " << mst.edges[i].from << " - " << mst.edges[i].to
+                 << "  $" << fixed << setprecision(2) << mst.edges[i].cost << "\n";
+        cout << "  ... (" << mst.edges.size() << " edges total)\n";
+        cout << "  Total Cost: $" << fixed << setprecision(2) << mst.totalCost << "\n";
+    }
+
+    // ── DFS ──────────────────────────────────────────────────────────────────
     sep("DFS Traversal");
     printTraversal(DFS::run(graph, "ATL"), "DFS from ATL");
     printTraversal(DFS::run(graph, "MIA"), "DFS from MIA");
     printTraversal(DFS::run(graph, "ORD"), "DFS from ORD");
 
-    // ── BFS examples ─────────────────────────────────────────────────────────
+    // ── BFS ──────────────────────────────────────────────────────────────────
     sep("BFS Traversal");
     printTraversal(BFS::run(graph, "ATL"), "BFS from ATL");
     printTraversal(BFS::run(graph, "MIA"), "BFS from MIA");

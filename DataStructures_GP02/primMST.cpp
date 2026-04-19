@@ -5,38 +5,45 @@ using namespace std;
 
 static const double INF = 1e18;
 
+// Prim's algorithm — handles disconnected graphs by running
+// once per connected component (produces a minimum spanning forest).
 MSTResult PrimMST::run(const Graph& graph) {
     MSTResult result;
     result.totalCost   = 0.0;
     result.isConnected = graph.isConnected();
-    if (!result.isConnected) return result;
 
     int V = graph.getVertexCount();
     vector<double> key(V, INF);
     vector<int>    parent(V, -1);
     vector<bool>   inMST(V, false);
-    key[0] = 0.0;
 
-    MinHeap heap(V);
-    heap.insert(HeapNode(0, 0.0, -1));
+    // Run Prim's from every unvisited vertex to cover disconnected components
+    for (int start = 0; start < V; ++start) {
+        if (inMST[start]) continue;
 
-    while (!heap.isEmpty()) {
-        HeapNode cur = heap.extractMin();
-        int u = cur.index;
-        if (inMST[u]) continue;
-        inMST[u] = true;
+        key[start] = 0.0;
+        MinHeap heap(V);
+        heap.insert(HeapNode(start, 0.0, -1));
 
-        for (Edge* e = graph.getUndirAdj(u); e; e = e->next) {
-            int v = e->dest;
-            if (!inMST[v] && e->cost < key[v]) {
-                key[v]=e->cost; parent[v]=u;
-                if (heap.contains(v)) heap.decreaseKey(v, e->cost, u);
-                else                  heap.insert(HeapNode(v, e->cost, u));
+        while (!heap.isEmpty()) {
+            HeapNode cur = heap.extractMin();
+            int u = cur.index;
+            if (inMST[u]) continue;
+            inMST[u] = true;
+
+            for (Edge* e = graph.getUndirAdj(u); e; e = e->next) {
+                int v = e->dest;
+                if (!inMST[v] && e->cost < key[v]) {
+                    key[v]    = e->cost;
+                    parent[v] = u;
+                    if (heap.contains(v)) heap.decreaseKey(v, e->cost, u);
+                    else                  heap.insert(HeapNode(v, e->cost, u));
+                }
             }
         }
     }
 
-    for (int i = 1; i < V; ++i) {
+    for (int i = 0; i < V; ++i) {
         if (parent[i] == -1) continue;
         MSTEdgeResult er;
         er.from = graph.codeOf(parent[i]);
