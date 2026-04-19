@@ -2,6 +2,7 @@
 #include <fstream>
 #include <sstream>
 #include <iostream>
+#include <algorithm>
 
 using namespace std;
 
@@ -9,6 +10,8 @@ void CSVReader::trim(string& s) {
     size_t a = s.find_first_not_of(" \t\r\n\"");
     size_t b = s.find_last_not_of(" \t\r\n\"");
     s = (a == string::npos) ? "" : s.substr(a, b-a+1);
+    // Remove any remaining carriage returns
+    s.erase(remove(s.begin(), s.end(), '\r'), s.end());
 }
 
 // Parses one CSV line respecting quoted fields e.g. "Allentown, PA"
