@@ -39,6 +39,7 @@ struct UndirectedEdge {
 
 struct PathResult {
     std::vector<std::string> path;
+    std::string destCode;   // destination airport code (set even if not found)
     double distance;
     double cost;
     bool   found;

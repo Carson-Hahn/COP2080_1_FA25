@@ -65,10 +65,8 @@ int main() {
         auto results = graph.shortestPathsToState("ATL", "FL");
         if (results.empty()) { cout << "  No paths found.\n"; }
         else {
-            for (const auto& pr : results) {
-                string dest = pr.found ? pr.path.back() : "unknown";
-                printPath(pr, "ATL", dest);
-            }
+            for (const auto& pr : results)
+                printPath(pr, "ATL", pr.destCode);
         }
     }
     sep("TASK 3 — Shortest Paths from ORD to all TX airports");
@@ -76,10 +74,8 @@ int main() {
         auto results = graph.shortestPathsToState("ORD", "TX");
         if (results.empty()) { cout << "  No paths found.\n"; }
         else {
-            for (const auto& pr : results) {
-                string dest = pr.found ? pr.path.back() : "unknown";
-                printPath(pr, "ORD", dest);
-            }
+            for (const auto& pr : results)
+                printPath(pr, "ORD", pr.destCode);
         }
     }
 

@@ -123,6 +123,7 @@ PathResult Graph::buildPath(int dest,
                              const vector<int>&    parent) const
 {
     PathResult res;
+    res.destCode = airports[dest].code;
     if (dist[dest] >= INF) { res.found = false; return res; }
     res.found=true; res.distance=dist[dest]; res.cost=costArr[dest];
     vector<string> rev;
