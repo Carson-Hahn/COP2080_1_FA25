@@ -53,12 +53,14 @@ int main() {
     cout << "Loaded " << graph.getVertexCount() << " airports, "
          << graph.getEdgeCount() << " flights.\n";
 
+    cout << "Testing Task 2...\n";
     // ── Task 2: Shortest path between two airports ────────────────────────────
     sep("TASK 2 — Shortest Path Between Two Airports");
     printPath(graph.shortestPath("ATL", "LAX"), "ATL", "LAX");
     printPath(graph.shortestPath("MIA", "ORD"), "MIA", "ORD");
     printPath(graph.shortestPath("JFK", "SFO"), "JFK", "SFO");
 
+    cout << "Task 2 done.\n";
     // ── Task 3: Shortest paths to all airports in a state ────────────────────
     sep("TASK 3 — Shortest Paths from ATL to all FL airports");
     {
@@ -73,12 +75,14 @@ int main() {
         for (const auto& pr : results) printPath(pr, "ORD", pr.path.empty()?"?":pr.path.back());
     }
 
+    cout << "Task 3 done.\n";
     // ── Task 4: Shortest path with exact number of stops ─────────────────────
     sep("TASK 4 — Shortest Path with Exact Stops");
     printPath(graph.shortestPathWithStops("ATL", "LAX", 1), "ATL", "LAX (1 stop)");
     printPath(graph.shortestPathWithStops("MIA", "SEA", 2), "MIA", "SEA (2 stops)");
     printPath(graph.shortestPathWithStops("JFK", "DFW", 1), "JFK", "DFW (1 stop)");
 
+    cout << "Task 4 done.\n";
     // ── Task 5: Connection counts ─────────────────────────────────────────────
     sep("TASK 5 — Top 10 Airports by Total Connections");
     auto conns = graph.getConnectionCounts();
